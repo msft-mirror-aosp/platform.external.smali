@@ -48,7 +48,7 @@ configurations {
 dependencies {
     compile project(':util')
     compile depends.findbugs
-    compile depends.guava
+    compile depends.guava_tools
 
     testCompile depends.junit
 

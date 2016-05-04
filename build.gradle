@@ -101,6 +101,7 @@ subprojects {
 
     ext {
         depends = [guava: 'com.google.guava:guava:18.0',
+                   guava_tools: 'com.google.guava:guava:18.0',
                    findbugs: 'com.google.code.findbugs:jsr305:1.3.9',
                    junit: 'junit:junit:4.6',
                    antlr_runtime: 'org.antlr:antlr-runtime:3.5.2',
