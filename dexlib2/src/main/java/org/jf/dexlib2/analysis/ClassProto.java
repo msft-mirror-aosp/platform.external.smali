@@ -219,7 +219,7 @@ public class ClassProto implements TypeProto {
 
         if (!interfacesFullyResolved) {
             throw new UnresolvedClassException("Interfaces for class %s not fully resolved: %s", getType(),
-                    String.join(",", getUnresolvedInterfaces()));
+                    getUnresolvedInterfaces());
         }
 
         return directInterfaces;
