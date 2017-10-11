@@ -39,6 +39,12 @@ LOCAL_SHARED_LIBRARIES := libdl
 
 LOCAL_MODULE_TAGS := optional
 
+LOCAL_CFLAGS := \
+    -Wall -Werror \
+    -Wno-incompatible-pointer-types-discards-qualifiers \
+    -Wno-main-return-type \
+    -Wno-unused-parameter \
+
 LOCAL_LDFLAGS := -Wl,--hash-style=sysv
 
 include $(BUILD_EXECUTABLE)
