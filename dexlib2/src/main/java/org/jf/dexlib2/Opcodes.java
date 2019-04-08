@@ -84,11 +84,11 @@ public class Opcodes {
 
     private Opcodes(int api, int artVersion) {
         if (api >= 21) {
-        this.api = api;
+            this.api = api;
             this.artVersion = mapApiToArtVersion(api);
         } else if (artVersion >= 0 && artVersion < 39) {
             this.api = mapArtVersionToApi(artVersion);
-        this.artVersion = artVersion;
+            this.artVersion = artVersion;
         } else {
             this.api = api;
             this.artVersion = artVersion;
