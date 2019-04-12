@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Google Inc.
+ * Copyright 2018, Google Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,20 +29,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jf.util;
+package org.jf.dexlib2.writer.pool;
+
+import org.jf.dexlib2.iface.value.ArrayEncodedValue;
+import org.jf.dexlib2.iface.value.EncodedValue;
+import org.jf.dexlib2.writer.EncodedArraySection;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.io.Reader;
+import java.util.List;
 
-public class BlankReader extends Reader {
-    public static final BlankReader INSTANCE = new BlankReader();
+public class EncodedArrayPool extends BaseOffsetPool<ArrayEncodedValue>
+        implements EncodedArraySection<ArrayEncodedValue, EncodedValue> {
 
-    @Override public int read(@Nonnull char[] chars, int i, int i2) throws IOException {
-        return -1;
+    public EncodedArrayPool(@Nonnull DexPool dexPool) {
+        super(dexPool);
+    }
+
+    public void intern(@Nonnull ArrayEncodedValue arrayEncodedValue) {
+        Integer prev = internedItems.put(arrayEncodedValue, 0);
+        if (prev == null) {
+            for (EncodedValue value: arrayEncodedValue.getValue()) {
+                dexPool.internEncodedValue(value);
+            }
+        }
     }
 
     @Override
-    public void close() throws IOException {
+    public List<? extends EncodedValue> getEncodedValueList(ArrayEncodedValue arrayEncodedValue) {
+        return arrayEncodedValue.getValue();
     }
 }
