@@ -27,6 +27,7 @@ java_library_host {
         "guava",
         "jcommander",
         "jsr305",
+        "smali-util",
     ],
 }
 
@@ -45,5 +46,6 @@ java_library_host {
         "commons-cli-1.2",
         "jcommander",
         "jsr305",
+        "smali-util",
     ],
 }

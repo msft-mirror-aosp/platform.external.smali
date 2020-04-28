@@ -31,7 +31,7 @@
 
 apply plugin: 'idea'
 
-version = '2.2.7'
+version = '2.2.2'
 def jcommanderVersion = ''
 
 if (!('release' in gradle.startParameter.taskNames)) {
@@ -57,6 +57,11 @@ if (!('release' in gradle.startParameter.taskNames)) {
     version += "-${versionSuffix}"
 } else {
     jcommanderVersion = 'com.beust:jcommander:1.64'
+
+    if (System.env.JDK6_HOME == null && !JavaVersion.current().isJava6()) {
+        throw new InvalidUserDataException("bzzzzzzzt. Release builds must be performed with java 6. " +
+                "Either run gradle with java 6, or define the JDK6_HOME environment variable.")
+    }
 }
 
 // Note: please don't use this. This is strictly for the official releases
@@ -64,7 +69,7 @@ if (!('release' in gradle.startParameter.taskNames)) {
 task release() {
 }
 
-task(install).doLast {
+task(install) << {
     println "Installing version: ${version}"
 }
 
@@ -79,6 +84,19 @@ subprojects {
         allprojects {
             tasks.withType(Javadoc) {
                 options.addStringOption('Xdoclint:none', '-quiet')
+            }
+        }
+    }
+
+    if (System.env.JDK6_HOME != null) {
+        sourceCompatibility = 1.6
+        targetCompatibility = 1.6
+
+        tasks.withType(JavaCompile) {
+            doFirst {
+                options.fork = true
+                options.bootClasspath = "$System.env.JDK6_HOME/jre/lib/rt.jar"
+                options.bootClasspath += "$File.pathSeparator$System.env.JDK6_HOME/jre/lib/jsse.jar"
             }
         }
     }
@@ -186,6 +204,6 @@ buildscript {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.6'
+    gradleVersion = '3.5'
     distributionType = Wrapper.DistributionType.ALL
 }

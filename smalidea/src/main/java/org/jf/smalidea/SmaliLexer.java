@@ -38,7 +38,7 @@ import org.antlr.runtime.CommonToken;
 import org.jetbrains.annotations.NotNull;
 import org.jf.smali.smaliFlexLexer;
 import org.jf.smali.smaliParser;
-import org.jf.smali.util.BlankReader;
+import org.jf.util.BlankReader;
 
 public class SmaliLexer extends LexerBase {
     private final smaliFlexLexer lexer = new smaliFlexLexer(BlankReader.INSTANCE);

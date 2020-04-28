@@ -1,18 +1,18 @@
 /*
- * Copyright 2018, Google Inc.
+ * Copyright 2015, Google Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
  *
- * Redistributions of source code must retain the above copyright
+ *     * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above
+ *     * Redistributions in binary form must reproduce the above
  * copyright notice, this list of conditions and the following disclaimer
  * in the documentation and/or other materials provided with the
  * distribution.
- * Neither the name of Google Inc. nor the names of its
+ *     * Neither the name of Google Inc. nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
  *
@@ -29,16 +29,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jf.dexlib2.util;
+package org.jf.util;
 
-public abstract class AlignmentUtils {
-    public static int alignOffset(int offset, int alignment) {
-        int mask = alignment - 1;
-        assert (alignment >= 0) && ((mask & alignment) == 0);
-        return (offset + mask) & ~mask;
+import org.junit.Assert;
+import org.junit.Test;
+
+public class TextUtilsTest {
+    @Test
+    public void testStripComments() {
+        Assert.assertEquals("", TextUtils.stripComments("#world"));
+        Assert.assertEquals("hello", TextUtils.stripComments("hello#world"));
+        Assert.assertEquals("multi\nline", TextUtils.stripComments("multi#hello world\nline#world"));
     }
 
-    public static boolean isAligned(int offset, int alignment) {
-        return (offset % alignment) == 0;
+    @Test
+    public void testNormalizeWhitespace() {
+        Assert.assertEquals("", TextUtils.normalizeWhitespace(" "));
+        Assert.assertEquals("hello", TextUtils.normalizeWhitespace("hello "));
+        Assert.assertEquals("hello", TextUtils.normalizeWhitespace(" hello"));
+        Assert.assertEquals("hello", TextUtils.normalizeWhitespace(" hello "));
+        Assert.assertEquals("hello\nworld", TextUtils.normalizeWhitespace("hello \n \n world"));
     }
 }

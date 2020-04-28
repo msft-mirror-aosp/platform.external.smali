@@ -32,15 +32,15 @@
 package org.jf.dexlib2.immutable.value;
 
 import org.jf.dexlib2.base.value.BaseEnumEncodedValue;
+import org.jf.dexlib2.iface.reference.FieldReference;
 import org.jf.dexlib2.iface.value.EnumEncodedValue;
-import org.jf.dexlib2.immutable.reference.ImmutableFieldReference;
 
 import javax.annotation.Nonnull;
 
 public class ImmutableEnumEncodedValue extends BaseEnumEncodedValue implements ImmutableEncodedValue {
-    @Nonnull protected final ImmutableFieldReference value;
+    @Nonnull protected final FieldReference value;
 
-    public ImmutableEnumEncodedValue(@Nonnull ImmutableFieldReference value) {
+    public ImmutableEnumEncodedValue(@Nonnull FieldReference value) {
         this.value = value;
     }
 
@@ -48,8 +48,8 @@ public class ImmutableEnumEncodedValue extends BaseEnumEncodedValue implements I
         if (enumEncodedValue instanceof ImmutableEnumEncodedValue) {
             return (ImmutableEnumEncodedValue)enumEncodedValue;
         }
-        return new ImmutableEnumEncodedValue(ImmutableFieldReference.of(enumEncodedValue.getValue()));
+        return new ImmutableEnumEncodedValue(enumEncodedValue.getValue());
     }
 
-    @Nonnull @Override public ImmutableFieldReference getValue() { return value; }
+    @Nonnull @Override public FieldReference getValue() { return value; }
 }

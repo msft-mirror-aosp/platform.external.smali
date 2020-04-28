@@ -41,14 +41,14 @@ import javax.annotation.Nonnull;
 
 public class DexBackedMethodEncodedValue extends BaseMethodEncodedValue {
     @Nonnull public final DexBackedDexFile dexFile;
-    private final int methodIndex;
+    private final int MethodIndex;
 
     public DexBackedMethodEncodedValue(@Nonnull DexReader reader, int valueArg) {
         this.dexFile = reader.dexBuf;
-        methodIndex = reader.readSizedSmallUint(valueArg + 1);
+        MethodIndex = reader.readSizedSmallUint(valueArg + 1);
     }
 
     @Nonnull @Override public MethodReference getValue() {
-        return new DexBackedMethodReference(dexFile, methodIndex);
+        return new DexBackedMethodReference(dexFile, MethodIndex);
     }
 }

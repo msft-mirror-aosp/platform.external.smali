@@ -31,15 +31,12 @@
 
 package org.jf.dexlib2.util;
 
-import org.jf.dexlib2.MethodHandleType;
 import org.jf.dexlib2.iface.reference.*;
-import org.jf.dexlib2.iface.value.EncodedValue;
 import org.jf.util.StringUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 
 public final class ReferenceUtil {
@@ -64,24 +61,14 @@ public final class ReferenceUtil {
     }
 
     public static String getMethodProtoDescriptor(MethodProtoReference methodProtoReference) {
-        StringWriter stringWriter = new StringWriter();
-        try {
-            writeMethodProtoDescriptor(stringWriter, methodProtoReference);
-        } catch (IOException ex) {
-            // IOException shouldn't happen for a StringWriter...
-            throw new RuntimeException(ex);
-        }
-        return stringWriter.toString();
-    }
-
-    public static void writeMethodProtoDescriptor(Writer writer, MethodProtoReference methodProtoReference)
-            throws IOException {
-        writer.write('(');
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
         for (CharSequence paramType : methodProtoReference.getParameterTypes()) {
-            writer.write(paramType.toString());
+            sb.append(paramType);
         }
-        writer.write(')');
-        writer.write(methodProtoReference.getReturnType());
+        sb.append(')');
+        sb.append(methodProtoReference.getReturnType());
+        return sb.toString();
     }
 
     public static void writeMethodDescriptor(Writer writer, MethodReference methodReference) throws IOException {
@@ -142,62 +129,6 @@ public final class ReferenceUtil {
         writer.write(fieldReference.getType());
     }
 
-    public static String getMethodHandleString(MethodHandleReference methodHandleReference) {
-        StringWriter stringWriter = new StringWriter();
-        try {
-            writeMethodHandle(stringWriter, methodHandleReference);
-        } catch (IOException ex) {
-            // IOException shouldn't happen for a StringWriter...
-            throw new RuntimeException(ex);
-        }
-        return stringWriter.toString();
-    }
-
-    public static void writeMethodHandle(Writer writer, MethodHandleReference methodHandleReference)
-            throws IOException {
-        writer.write(MethodHandleType.toString(methodHandleReference.getMethodHandleType()));
-        writer.write('@');
-
-        Reference memberReference = methodHandleReference.getMemberReference();
-        if (memberReference instanceof MethodReference) {
-            writeMethodDescriptor(writer, (MethodReference)memberReference);
-        } else {
-            writeFieldDescriptor(writer, (FieldReference)memberReference);
-        }
-    }
-
-    public static String getCallSiteString(CallSiteReference callSiteReference) {
-        StringWriter stringWriter = new StringWriter();
-        try {
-            writeCallSite(stringWriter, callSiteReference);
-        } catch (IOException ex) {
-            // IOException shouldn't happen for a StringWriter...
-            throw new RuntimeException(ex);
-        }
-        return stringWriter.toString();
-    }
-
-    public static void writeCallSite(Writer writer, CallSiteReference callSiteReference) throws IOException {
-        writer.write(callSiteReference.getName());
-        writer.write('(');
-        writer.write('"');
-        StringUtils.writeEscapedString(writer, callSiteReference.getMethodName());
-        writer.write('"');
-        writer.write(", ");
-        writeMethodProtoDescriptor(writer, callSiteReference.getMethodProto());
-
-        for (EncodedValue encodedValue : callSiteReference.getExtraArguments()) {
-            writer.write(", ");
-            EncodedValueUtils.writeEncodedValue(writer, encodedValue);
-        }
-        writer.write(")@");
-        MethodHandleReference methodHandle = callSiteReference.getMethodHandle();
-        if (methodHandle.getMethodHandleType() != MethodHandleType.INVOKE_STATIC) {
-            throw new IllegalArgumentException("The linker method handle for a call site must be of type invoke-static");
-        }
-        writeMethodDescriptor(writer, (MethodReference)callSiteReference.getMethodHandle().getMemberReference());
-    }
-
     @Nullable
     public static String getReferenceString(@Nonnull Reference reference) {
         return getReferenceString(reference, null);
@@ -224,14 +155,6 @@ public final class ReferenceUtil {
         if (reference instanceof MethodProtoReference) {
             MethodProtoReference methodProtoReference = (MethodProtoReference)reference;
             return getMethodProtoDescriptor(methodProtoReference);
-        }
-        if (reference instanceof MethodHandleReference) {
-            MethodHandleReference methodHandleReference = (MethodHandleReference)reference;
-            return getMethodHandleString(methodHandleReference);
-        }
-        if (reference instanceof CallSiteReference) {
-            CallSiteReference callSiteReference = (CallSiteReference)reference;
-            return getCallSiteString(callSiteReference);
         }
         return null;
     }

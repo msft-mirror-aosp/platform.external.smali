@@ -102,11 +102,15 @@ public class DexBackedMethodReference extends BaseMethodReference {
     /**
      * Calculate and return the private size of a method reference.
      *
-     * Calculated as: class_idx + proto_idx + name_idx
+     * Calculated as: class_idx + proto_idx + name_idx + prototype size
      *
      * @return size in bytes
      */
     public int getSize() {
-        return MethodIdItem.ITEM_SIZE; //ushort + ushort + uint for indices
+        int size = MethodIdItem.ITEM_SIZE; //ushort + ushort + uint for indices
+        DexBackedMethodProtoReference protoRef = new DexBackedMethodProtoReference(dexFile,
+            dexFile.readUshort(methodIdItemOffset + MethodIdItem.PROTO_OFFSET));
+        size += protoRef.getSize();
+        return size;
     }
 }

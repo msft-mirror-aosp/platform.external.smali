@@ -40,9 +40,7 @@ public final class ReferenceType {
     public static final int FIELD = 2;
     public static final int METHOD = 3;
     public static final int METHOD_PROTO = 4;
-    public static final int CALL_SITE = 5;
-    public static final int METHOD_HANDLE = 6;
-    public static final int NONE = 7;
+    public static final int NONE = 5;
 
     public static String toString(int referenceType) {
         switch (referenceType) {
@@ -56,10 +54,6 @@ public final class ReferenceType {
                 return "method";
             case METHOD_PROTO:
                 return "method_proto";
-            case CALL_SITE:
-                return "call_site";
-            case METHOD_HANDLE:
-                return "method_handle";
             default:
                 throw new InvalidReferenceTypeException(referenceType);
         }
@@ -76,10 +70,6 @@ public final class ReferenceType {
             return METHOD;
         } else if (reference instanceof MethodProtoReference) {
             return METHOD_PROTO;
-        } else if (reference instanceof CallSiteReference) {
-            return CALL_SITE;
-        } else if (reference instanceof MethodHandleReference) {
-            return METHOD_HANDLE;
         } else {
             throw new IllegalStateException("Invalid reference");
         }

@@ -50,12 +50,11 @@ public class DexUtil {
      * The inputStream must support mark(), and will be reset to initial position upon exiting the method
      *
      * @param inputStream An input stream that is positioned at a dex header
-     * @return The dex version
      * @throws NotADexFile If the file is not a dex file
      * @throws InvalidFile If the header appears to be a dex file, but is not valid for some reason
      * @throws UnsupportedFile If the dex header is valid, but uses unsupported functionality
      */
-    public static int verifyDexHeader(@Nonnull InputStream inputStream) throws IOException {
+    public static void verifyDexHeader(@Nonnull InputStream inputStream) throws IOException {
         if (!inputStream.markSupported()) {
             throw new IllegalArgumentException("InputStream must support mark");
         }
@@ -69,7 +68,7 @@ public class DexUtil {
             inputStream.reset();
         }
 
-        return verifyDexHeader(partialHeader, 0);
+        verifyDexHeader(partialHeader, 0);
     }
 
     /**
@@ -77,12 +76,11 @@ public class DexUtil {
      *
      * @param buf A byte array containing at least the first 44 bytes of a dex file
      * @param offset The offset within the array to the dex header
-     * @return The dex version
      * @throws NotADexFile If the file is not a dex file
      * @throws InvalidFile If the header appears to be a dex file, but is not valid for some reason
      * @throws UnsupportedFile If the dex header is valid, but uses unsupported functionality
      */
-    public static int verifyDexHeader(@Nonnull byte[] buf, int offset) {
+    public static void verifyDexHeader(@Nonnull byte[] buf, int offset) {
         int dexVersion = HeaderItem.getVersion(buf, offset);
         if (dexVersion == -1) {
             StringBuilder sb = new StringBuilder("Not a valid dex magic value:");
@@ -104,8 +102,6 @@ public class DexUtil {
         if (endian != HeaderItem.LITTLE_ENDIAN_TAG) {
             throw new InvalidFile(String.format("Invalid endian tag: 0x%x", endian));
         }
-
-        return dexVersion;
     }
 
     /**

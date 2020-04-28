@@ -32,6 +32,7 @@
 package org.jf.dexlib2.writer;
 
 import junit.framework.Assert;
+import org.jf.util.NakedByteArrayOutputStream;
 import org.junit.Test;
 
 import java.io.IOException;

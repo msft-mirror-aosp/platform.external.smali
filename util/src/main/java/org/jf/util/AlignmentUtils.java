@@ -1,6 +1,6 @@
 /*
  * [The "BSD licence"]
- * Copyright (c) 2010 Ben Gruver
+ * Copyright (c) 2010 Ben Gruver (JesusFreke)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jf.baksmali.Adaptors;
+package org.jf.util;
 
-import org.jf.dexlib2.ReferenceType;
-import org.jf.dexlib2.iface.reference.*;
-import org.jf.dexlib2.util.ReferenceUtil;
-import org.jf.util.IndentingWriter;
-import org.jf.util.StringUtils;
-
-import java.io.IOException;
-
-public class ReferenceFormatter {
-    public static void writeStringReference(IndentingWriter writer, String item) throws IOException {
-        writer.write('"');
-        StringUtils.writeEscapedString(writer, item);
-        writer.write('"');
+public abstract class AlignmentUtils {
+    public static int alignOffset(int offset, int alignment) {
+        int mask = alignment - 1;
+        assert (alignment >= 0) && ((mask & alignment) == 0);
+        return (offset + mask) & ~mask;
     }
 
-    public static void writeReference(IndentingWriter writer, int referenceType,
-                                      Reference reference) throws IOException {
-        switch (referenceType) {
-            case ReferenceType.STRING:
-                writeStringReference(writer, ((StringReference)reference).getString());
-                return;
-            case ReferenceType.TYPE:
-                writer.write(((TypeReference)reference).getType());
-                return;
-            case ReferenceType.METHOD:
-                ReferenceUtil.writeMethodDescriptor(writer, (MethodReference)reference);
-                return;
-            case ReferenceType.FIELD:
-                ReferenceUtil.writeFieldDescriptor(writer, (FieldReference)reference);
-                return;
-            default:
-                throw new IllegalStateException("Unknown reference type");
-        }
+    public static boolean isAligned(int offset, int alignment) {
+        return (offset % alignment) == 0;
     }
 }

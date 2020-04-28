@@ -39,33 +39,31 @@ import org.jf.dexlib2.iface.value.EncodedValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class EncodedArrayItemIterator {
-    public static final EncodedArrayItemIterator EMPTY = new EncodedArrayItemIterator() {
+public abstract class StaticInitialValueIterator {
+    public static final StaticInitialValueIterator EMPTY = new StaticInitialValueIterator() {
         @Nullable @Override public EncodedValue getNextOrNull() { return null; }
         @Override public void skipNext() {}
         @Override public int getReaderOffset() { return 0; }
-        @Override public int getItemCount() { return 0; }
     };
 
     @Nullable public abstract EncodedValue getNextOrNull();
     public abstract void skipNext();
     public abstract int getReaderOffset();
-    public abstract int getItemCount();
 
     @Nonnull
-    public static EncodedArrayItemIterator newOrEmpty(@Nonnull DexBackedDexFile dexFile, int offset) {
+    public static StaticInitialValueIterator newOrEmpty(@Nonnull DexBackedDexFile dexFile, int offset) {
         if (offset == 0) {
             return EMPTY;
         }
-        return new EncodedArrayItemIteratorImpl(dexFile, offset);
+        return new StaticInitialValueIteratorImpl(dexFile, offset);
     }
 
-    private static class EncodedArrayItemIteratorImpl extends EncodedArrayItemIterator {
+    private static class StaticInitialValueIteratorImpl extends StaticInitialValueIterator {
         @Nonnull private final DexReader reader;
         private final int size;
         private int index = 0;
 
-        public EncodedArrayItemIteratorImpl(@Nonnull DexBackedDexFile dexFile, int offset) {
+        public StaticInitialValueIteratorImpl(@Nonnull DexBackedDexFile dexFile, int offset) {
             this.reader = dexFile.readerAt(offset);
             this.size = reader.readSmallUleb128();
         }
@@ -79,7 +77,6 @@ public abstract class EncodedArrayItemIterator {
             return null;
         }
 
-        @Override
         public void skipNext() {
             if (index < size) {
                 index++;
@@ -87,14 +84,8 @@ public abstract class EncodedArrayItemIterator {
             }
         }
 
-        @Override
         public int getReaderOffset() {
             return reader.getOffset();
-        }
-
-        @Override
-        public int getItemCount() {
-            return size;
         }
     }
 }

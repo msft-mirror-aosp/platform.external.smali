@@ -33,9 +33,7 @@ package org.jf.dexlib2.writer.pool;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Ordering;
+import com.google.common.collect.*;
 import org.jf.dexlib2.DebugItemType;
 import org.jf.dexlib2.ReferenceType;
 import org.jf.dexlib2.builder.MutableMethodImplementation;
@@ -44,13 +42,14 @@ import org.jf.dexlib2.iface.debug.*;
 import org.jf.dexlib2.iface.instruction.Instruction;
 import org.jf.dexlib2.iface.instruction.ReferenceInstruction;
 import org.jf.dexlib2.iface.reference.*;
-import org.jf.dexlib2.iface.value.ArrayEncodedValue;
 import org.jf.dexlib2.iface.value.EncodedValue;
+import org.jf.dexlib2.immutable.value.ImmutableEncodedValueFactory;
+import org.jf.dexlib2.util.EncodedValueUtils;
 import org.jf.dexlib2.util.ReferenceUtil;
 import org.jf.dexlib2.writer.ClassSection;
 import org.jf.dexlib2.writer.DebugWriter;
-import org.jf.dexlib2.writer.util.StaticInitializerUtil;
 import org.jf.util.AbstractForwardSequentialList;
+import org.jf.util.CollectionUtils;
 import org.jf.util.ExceptionWithContext;
 
 import javax.annotation.Nonnull;
@@ -61,7 +60,7 @@ import java.util.Map.Entry;
 
 public class ClassPool extends BasePool<String, PoolClassDef> implements ClassSection<CharSequence, CharSequence,
         TypeListPool.Key<? extends Collection<? extends CharSequence>>, PoolClassDef, Field, PoolMethod,
-        Set<? extends Annotation>, ArrayEncodedValue> {
+        Set<? extends Annotation>, EncodedValue> {
 
     public ClassPool(@Nonnull DexPool dexPool) {
         super(dexPool);
@@ -95,11 +94,6 @@ public class ClassPool extends BasePool<String, PoolClassDef> implements ClassSe
             }
 
             dexPool.annotationSetSection.intern(field.getAnnotations());
-
-            ArrayEncodedValue staticInitializers = getStaticInitializers(poolClassDef);
-            if (staticInitializers != null) {
-                dexPool.encodedArraySection.intern(staticInitializers);
-            }
         }
 
         HashSet<String> methods = new HashSet<String>();
@@ -144,9 +138,6 @@ public class ClassPool extends BasePool<String, PoolClassDef> implements ClassSe
                             break;
                         case ReferenceType.METHOD:
                             dexPool.methodSection.intern((MethodReference)reference);
-                            break;
-                        case ReferenceType.CALL_SITE:
-                            dexPool.callSiteSection.intern((CallSiteReference) reference);
                             break;
                         default:
                             throw new ExceptionWithContext("Unrecognized reference type: %d",
@@ -249,9 +240,43 @@ public class ClassPool extends BasePool<String, PoolClassDef> implements ClassSe
         return classDef.getSourceFile();
     }
 
-    @Nullable @Override public ArrayEncodedValue getStaticInitializers(
+    private static final Predicate<Field> HAS_INITIALIZER = new Predicate<Field>() {
+        @Override
+        public boolean apply(Field input) {
+            EncodedValue encodedValue = input.getInitialValue();
+            return encodedValue != null && !EncodedValueUtils.isDefaultValue(encodedValue);
+        }
+    };
+
+    private static final Function<Field, EncodedValue> GET_INITIAL_VALUE = new Function<Field, EncodedValue>() {
+        @Override
+        public EncodedValue apply(Field input) {
+            EncodedValue initialValue = input.getInitialValue();
+            if (initialValue == null) {
+                return ImmutableEncodedValueFactory.defaultValueForType(input.getType());
+            }
+            return initialValue;
+        }
+    };
+
+    @Nullable @Override public Collection<? extends EncodedValue> getStaticInitializers(
             @Nonnull PoolClassDef classDef) {
-        return StaticInitializerUtil.getStaticInitializers(classDef.getStaticFields());
+        final SortedSet<Field> sortedStaticFields = classDef.getStaticFields();
+
+        final int lastIndex = CollectionUtils.lastIndexOf(sortedStaticFields, HAS_INITIALIZER);
+        if (lastIndex > -1) {
+            return new AbstractCollection<EncodedValue>() {
+                @Nonnull @Override public Iterator<EncodedValue> iterator() {
+                    Iterable<Field> fields = Iterables.limit(sortedStaticFields, lastIndex + 1);
+                    return Iterables.transform(fields, GET_INITIAL_VALUE).iterator();
+                }
+
+                @Override public int size() {
+                    return lastIndex+1;
+                }
+            };
+        }
+        return null;
     }
 
     @Nonnull @Override public Collection<? extends Field> getSortedStaticFields(@Nonnull PoolClassDef classDef) {
@@ -392,6 +417,14 @@ public class ClassPool extends BasePool<String, PoolClassDef> implements ClassSe
     @Nonnull @Override
     public MutableMethodImplementation makeMutableMethodImplementation(@Nonnull PoolMethod poolMethod) {
         return new MutableMethodImplementation(poolMethod.getImplementation());
+    }
+
+    @Override public void setEncodedArrayOffset(@Nonnull PoolClassDef classDef, int offset) {
+        classDef.encodedArrayOffset = offset;
+    }
+
+    @Override public int getEncodedArrayOffset(@Nonnull PoolClassDef classDef) {
+        return classDef.encodedArrayOffset;
     }
 
     @Override public void setAnnotationDirectoryOffset(@Nonnull PoolClassDef classDef, int offset) {

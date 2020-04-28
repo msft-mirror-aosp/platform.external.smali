@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Google Inc.
+ * Copyright 2012, Google Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jf.dexlib2.writer;
+package org.jf.util;
 
-import org.jf.dexlib2.iface.reference.CallSiteReference;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
-public interface CallSiteSection<CallSiteKey extends CallSiteReference, EncodedArrayKey>
-        extends IndexSection<CallSiteKey> {
-    EncodedArrayKey getEncodedCallSite(CallSiteKey callSiteReference);
+/**
+ * A ByteArrayOutputStream that lets you grab its protected bits.
+ */
+public class NakedByteArrayOutputStream extends ByteArrayOutputStream {
+    public byte[] getBuffer() throws IOException {
+        return buf;
+    }
 }
