@@ -47,3 +47,21 @@ java_library_host {
         "jsr305",
     ],
 }
+
+java_library_host {
+    name: "dexlib2-no-guava-no-cli",
+
+    srcs: [
+        "src/main/java/**/*.java",
+    ],
+
+    libs: [
+        "guava",
+        "commons-cli-1.2",
+    ],
+
+    static_libs: [
+        "jcommander",
+        "jsr305",
+    ],
+}
