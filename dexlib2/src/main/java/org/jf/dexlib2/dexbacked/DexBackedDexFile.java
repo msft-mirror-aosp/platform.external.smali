@@ -100,6 +100,16 @@ public class DexBackedDexFile extends BaseDexBuffer implements DexFile {
         classCount = readSmallUint(HeaderItem.CLASS_COUNT_OFFSET);
         classStartOffset = readSmallUint(HeaderItem.CLASS_START_OFFSET);
         mapOffset = readSmallUint(HeaderItem.MAP_OFFSET);
+
+        if (dexVersion >= 41) {
+          // Reject non-trivial dex container (i.e. multiples dex files in the same physical file).
+          int container_off = readSmallUint(HeaderItem.CONTAINER_OFF_OFFSET);
+          int container_size = readSmallUint(HeaderItem.CONTAINER_SIZE_OFFSET);
+          int file_size = readSmallUint(HeaderItem.FILE_SIZE_OFFSET);
+          if (container_off != 0 || container_size != file_size) {
+            throw new DexUtil.UnsupportedFile(String.format("Dex container is not supported"));
+          }
+        }
     }
 
     public DexBackedDexFile(@Nullable Opcodes opcodes, @Nonnull BaseDexBuffer buf) {
